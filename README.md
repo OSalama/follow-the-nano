@@ -1,4 +1,5 @@
 Tool to track nano movements between accounts.
+
 View sample.gv.svg in your browser to see sample output
 
 TODO: Finish this properly
