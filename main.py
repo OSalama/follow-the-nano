@@ -7,11 +7,14 @@ from decimal import Decimal
 
 MAX_DEPTH = 4
 SEND_OR_RECEIVE = "send"
-NODE_URL = "" # Put your node URL in here. Public nodes available at https://publicnodes.somenano.com/
+NODE_URL = "https://nault.nanos.cc/proxy" # Put your node URL in here. Public nodes available at https://publicnodes.somenano.com/
 NANOCRAWLER_ACCOUNT_URL = "https://nanocrawler.cc/explorer/account/{address}/history"
 API_KEY = ""
 RAW_TO_MNANO = Decimal(10 ** 30)
 TRANSACTION_HISTORY_LIMIT = 100
+IGNORE_LIST = [
+                "nano_3jwrszth46rk1mu7rmb4rhm54us8yg1gw3ipodftqtikf5yqdyr7471nsg1k" #Binance
+              ]
 
 
 def main():
@@ -33,7 +36,7 @@ def explore_addresses(dot: Digraph, starting_addresses: List[str], rpc_client: n
     while depth_counter < MAX_DEPTH and addresses_to_explore:
         next_addresses_to_explore = set()
         for address in addresses_to_explore:
-            if address in explored_nodes:
+            if address in explored_nodes or address in IGNORE_LIST:
                 continue
             resp = rpc_account_history(address, rpc_client)
             transactions = get_transactions(resp)
