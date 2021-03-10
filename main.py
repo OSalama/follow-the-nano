@@ -126,7 +126,29 @@ def random_history(nano_address: str) -> Dict:
             {"type": "send", "account": account, "amount": randint(1, 10) * RAW_TO_MNANO})
     return transactions
 
+"""
+Ideally want to traverse all the nodes first, logging all the transaction histories for each.
+Then for each node, add all send addresses to next explore
+Then once fully explored, we summarise transactions, and obtain a unique txn ref for each one
+Maybe even net things out - if A -> B and B -> A then it's net 0 and we shouldn't even care right?
+Problem is that send/receive are actually distinct.
+
+Probably works fine to say send 1n A -> B and receive 1n B -> A are the same and dedupe those
+Only works for send/receive actually
+AHHhhhhh
+
+
+It should only be done on nodes which haven't already been explored. The idea is to only pull in
+receives on the current node from nodes which we are never going to expllore
+
+
+So we build up the full graph of all the things we want to explore FIRST
+then we summarise transactions, process all the sends, and when looking at receives
+we have to check if the node is in the explored list.
+If not, then we can add them, otherwise they're already handled as a send
+"""
 def summarise_transactions(transactions: Dict) -> Dict[str, TransactionSummary]:
+    #TODO: Filter self sending
     sends = DefaultDict(TransactionSummary)
     receives = DefaultDict(TransactionSummary)
     for transaction in transactions:
