@@ -16,7 +16,7 @@ BIG_PICTURE = True
 
 TRAVERSAL_DIRECTION = SEND # TODO: Take input
 
-NODE_URL = "https://nault.nanos.cc/proxy" # Put your node URL in here. Public nodes available at https://publicnodes.somenano.com/
+NODE_URL = "" # Put your node URL in here. Public nodes available at https://publicnodes.somenano.com/
 NANOCRAWLER_ACCOUNT_URL = "https://nanocrawler.cc/explorer/account/{address}/history"
 API_KEY = ""
 RAW_TO_MNANO = Decimal(10 ** 30)
