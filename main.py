@@ -1,7 +1,8 @@
 
 import logging
-from typing import DefaultDict, Dict, List
+from typing import Dict, List
 from graphviz import Digraph
+from collections import defaultdict
 import nano
 from decimal import Decimal
 from random import randint
@@ -16,7 +17,7 @@ BIG_PICTURE = True
 
 TRAVERSAL_DIRECTION = SEND # TODO: Take input
 
-NODE_URL = "" # Put your node URL in here. Public nodes available at https://publicnodes.somenano.com/
+NODE_URL = "https://proxy.nanos.cc/proxy/" # Put your node URL in here. Public nodes available at https://publicnodes.somenano.com/
 NANOCRAWLER_ACCOUNT_URL = "https://nanocrawler.cc/explorer/account/{address}/history"
 API_KEY = ""
 RAW_TO_MNANO = Decimal(10 ** 30)
@@ -28,7 +29,8 @@ IGNORE_LIST = [
 
 class TransactionSummary:
 
-    def __init__(self):
+    def __init__(self, address: str):
+        self.address = address
         self.amount_received = Decimal()
         self.total_num_receives = 0
         self.amount_sent = Decimal()
@@ -71,6 +73,7 @@ def explore_addresses(dot: Digraph, starting_addresses: List[str], rpc_client: n
     addresses_to_explore = set(starting_addresses)
     explored_nodes = set()
     depth_counter = 0
+    aux_transactions = []
     while depth_counter < MAX_DEPTH and addresses_to_explore:
         next_addresses_to_explore = set()
         # FUXME: all the duplication...
@@ -78,13 +81,13 @@ def explore_addresses(dot: Digraph, starting_addresses: List[str], rpc_client: n
             if address in explored_nodes or address in IGNORE_LIST:
                 continue
             transaction_history = get_account_history(address, rpc_client)
-            sends, receives = summarise_transactions(transaction_history)
+            sends, receives = summarise_transactions(address, transaction_history)
             if TRAVERSAL_DIRECTION == SEND:
                 follows = sends
-                aux = receives
+                aux_transactions.append(receives)
             elif TRAVERSAL_DIRECTION == RECEIVE:
                 follows = receives
-                aux = sends
+                aux_transactions.append(sends)
 
             for next_node, transaction_summary in follows.items():
                 if next_node not in explored_nodes:
@@ -93,15 +96,19 @@ def explore_addresses(dot: Digraph, starting_addresses: List[str], rpc_client: n
                          label=next_node[:10], # Limit address length for easier viewing of graph
                          URL=NANOCRAWLER_ACCOUNT_URL.format(address=next_node))
                 dot.edge(address, next_node, label=transaction_summary.make_label())
-            if BIG_PICTURE:
-                for aux_node, aux_summary in aux.items():
-                    dot.node(aux_node,
-                            label=aux_node[:10], # Limit address length for easier viewing of graph
-                            URL=NANOCRAWLER_ACCOUNT_URL.format(address=aux_node))
-                    dot.edge(aux_node, address, label=aux_summary.make_label(reverse=True))
             explored_nodes.add(address)
         depth_counter += 1
         addresses_to_explore = next_addresses_to_explore
+    if BIG_PICTURE:
+        for aux_tx in aux_transactions:
+            for aux_address, aux_summary in aux_tx.items():
+                if aux_address in explored_nodes:
+                    continue
+                address = aux_summary.address
+                dot.node(aux_address,
+                        label=aux_address[:10], # Limit address length for easier viewing of graph
+                        URL=NANOCRAWLER_ACCOUNT_URL.format(address=aux_address))
+                dot.edge(aux_address, address, label=aux_summary.make_label(reverse=True))
 
 def rpc_account_history(nano_address: str, rpc_client: nano.rpc.Client) -> Dict:
     logging.info("Requesting account history for %s", nano_address)
@@ -147,10 +154,10 @@ then we summarise transactions, process all the sends, and when looking at recei
 we have to check if the node is in the explored list.
 If not, then we can add them, otherwise they're already handled as a send
 """
-def summarise_transactions(transactions: Dict) -> Dict[str, TransactionSummary]:
+def summarise_transactions(address: str, transactions: Dict) -> Dict[str, TransactionSummary]:
     #TODO: Filter self sending
-    sends = DefaultDict(TransactionSummary)
-    receives = DefaultDict(TransactionSummary)
+    sends = defaultdict(lambda: TransactionSummary(address))
+    receives = defaultdict(lambda: TransactionSummary(address))
     for transaction in transactions:
         raw_amount = transaction["amount"]
         mnano_amount = (Decimal(raw_amount) / RAW_TO_MNANO)
