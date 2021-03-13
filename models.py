@@ -16,9 +16,9 @@ class TransactionDirection(Enum):
 
 class TransactionSummary:
 
-    def __init__(self):#, source_address: str, target_address: str):
-        # self.source_address = source_address
-        # self.target_address = target_address
+    def __init__(self, source_address: str, target_address: str):
+        self.source_address = source_address
+        self.target_address = target_address
         self.total_amount = Decimal()
         self.total_num_transactions = 0
 

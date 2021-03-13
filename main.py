@@ -55,25 +55,44 @@ class FollowTheNano:
 
     def summarise_transactions(self, address: str, transaction_history: Dict) -> Dict[str, TransactionSummary]:
         next_nodes = set()
-        node_transactions = defaultdict(lambda: defaultdict(TransactionSummary))
+        node_transactions = {}
         for transaction in transaction_history:
             raw_amount = transaction["amount"]
             mnano_amount = (Decimal(raw_amount) / RAW_TO_MNANO)
             target_address = transaction["account"]
             if TransactionDirection(transaction["type"]) == self.traversal_direction:
-                txn = node_transactions[address][target_address]
+                key = f"{address}-{target_address}"
+                txn = node_transactions.get(key)
+                if not txn:
+                    txn = TransactionSummary(address, target_address)
+                    node_transactions[key] = txn
                 txn.add(mnano_amount)
                 next_nodes.add(target_address)
             elif self.show_all_balance_sources:
-                txn = node_transactions[target_address][address]
+                key = f"{target_address}-{address}"
+                txn = node_transactions.get(key)
+                if not txn:
+                    txn = TransactionSummary(target_address, address)
+                    node_transactions[key] = txn
                 txn.add(mnano_amount)
-        # Need to stick the node_transactions into self.all_transactions now
-        for k1, v1 in node_transactions.items():
-            if k1 in self.all_transactions:
-                for k2, v2 in v1.items():
-                    if k2 in v1:
-                        logging.error("Already hold entries for")
+        self.add_transactions_to_master_list(node_transactions)
         return next_nodes
+
+    def add_transactions_to_master_list(self, transactions: Dict[str, TransactionSummary]):
+        for k,transaction_summary in transactions.items():
+            source = k.split("-")[0]
+            target = k.split("-")[1]
+            source_txns = self.all_transactions.get(source)
+            if source_txns:
+                target_txn = source_txns.get(target)
+                if target_txn:
+                    # Should check if the target is equal to incoming first
+                    # If so, can just ignore, else log the error
+                    logging.error("Already processed this transaction summary")
+                    continue
+            else:
+                self.all_transactions[source] = {}
+            self.all_transactions[source][target] = transaction_summary
 
     def draw(self):
         for source_address, targets in self.all_transactions.items():
