@@ -16,23 +16,15 @@ class TransactionDirection(Enum):
 
 class TransactionSummary:
 
-    def __init__(self, address: str):
-        self.address = address
-        self.amount_received = Decimal()
-        self.total_num_receives = 0
-        self.amount_sent = Decimal()
-        self.total_num_sends = 0
+    def __init__(self):#, source_address: str, target_address: str):
+        # self.source_address = source_address
+        # self.target_address = target_address
+        self.total_amount = Decimal()
+        self.total_num_transactions = 0
 
-    def make_label(self, direction):
-        if direction == TransactionDirection.SEND:
-            return f"{self.amount_sent}/{self.total_num_sends}"
-        elif direction == TransactionDirection.RECEIVE:
-            return f"{self.amount_received}/{self.total_num_receives}"
+    def make_label(self):
+        return f"{self.total_amount}/{self.total_num_transactions}"
 
-    def process_send(self, mnano_amount):
-        self.total_num_sends += 1
-        self.amount_sent += mnano_amount
-
-    def process_receive(self, mnano_amount):
-        self.total_num_receives += 1
-        self.amount_received += mnano_amount
+    def add(self, mnano_amount):
+        self.total_num_transactions += 1
+        self.total_amount += mnano_amount
