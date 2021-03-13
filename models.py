@@ -14,6 +14,7 @@ class TransactionDirection(Enum):
         else:
             return TransactionDirection.SEND
 
+
 class TransactionSummary:
 
     def __init__(self, source_address: str, target_address: str):
@@ -22,8 +23,13 @@ class TransactionSummary:
         self.total_amount = Decimal()
         self.total_num_transactions = 0
 
-    def make_label(self):
-        return f"{self.total_amount}/{self.total_num_transactions}"
+    def __eq__(self, other: object) -> bool:
+        return (
+            self.source_address == other.source_address and
+            self.target_address == other.target_address and
+            self.total_amount == other.total_amount and
+            self.total_num_transactions == other.total_num_transactions
+        )
 
     def add(self, mnano_amount):
         self.total_num_transactions += 1

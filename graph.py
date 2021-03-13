@@ -1,5 +1,6 @@
 
 
+from models import TransactionSummary
 from graphviz import Digraph
 
 
@@ -22,8 +23,16 @@ class NanoGraph:
                             label=address[:10],
                             URL=NANOCRAWLER_ACCOUNT_URL.format(address=address))
 
-    def connect(self, from_address: str, to_address: str, transaction_label: str):
-        self.graph.edge(from_address, to_address, label=transaction_label)
+    def connect(self, transaction_summary: TransactionSummary) -> None:
+        self.graph.edge(transaction_summary.source_address,
+                        transaction_summary.target_address,
+                        label=f"{transaction_summary.total_amount}/{transaction_summary.total_num_transactions}"
+                        )
 
-    def render(self):
+    def render_graph(self):
         self.graph.render("test.gv", view=True, format="svg")
+
+    def add_transaction(self, transaction_summary: TransactionSummary):
+        self.add_node(transaction_summary.source_address)
+        self.add_node(transaction_summary.target_address)
+        self.connect(transaction_summary)
