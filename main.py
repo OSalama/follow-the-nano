@@ -8,13 +8,14 @@ from rpc import HistoryRequestor
 import requests
 
 IS_TESTING_MODE = False
-
+NANO_NINJA_BASE_URL = "https://mynano.ninja/api"
+ALIASES_ENDPOINT = "accounts/aliases"
 API_KEY = ""
 SEPARATOR = "-"
 
 IGNORE_LIST = [
     "nano_3jwrszth46rk1mu7rmb4rhm54us8yg1gw3ipodftqtikf5yqdyr7471nsg1k"  # Binance
-]  # Possible TODO: hook into mynano.ninja for aliases
+]
 
 
 class FollowTheNano:
@@ -134,9 +135,7 @@ def main():
 
 
 def get_aliases():
-    NANO_NINJA_BASE_URL = "https://mynano.ninja/api/"
-    ALIASES_ENDPOINT = "/accounts/aliases"
-    endpoint = f"{NANO_NINJA_BASE_URL}{ALIASES_ENDPOINT}"
+    endpoint = f"{NANO_NINJA_BASE_URL}/{ALIASES_ENDPOINT}"
     resp = requests.get(endpoint)
     resp_json = resp.json()
     aliases = {alias["account"]:alias["alias"] for alias in resp_json}
