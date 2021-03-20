@@ -17,7 +17,7 @@ class HistoryRequestor:
 
     def get_account_history(self, nano_address: str) -> Optional[Dict]:
         if self.call_counter >= MAX_CALLS_PER_GRAPH:
-            logging.error("Reached max calls per graph")
+            logging.error("Reached max calls per graph: %d", MAX_CALLS_PER_GRAPH)
             raise ValueError("Graph reached max call limit")
         self.call_counter += 1
         if self.use_real_rpc:

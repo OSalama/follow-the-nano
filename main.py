@@ -17,10 +17,12 @@ IGNORE_LIST = [
     "nano_3jwrszth46rk1mu7rmb4rhm54us8yg1gw3ipodftqtikf5yqdyr7471nsg1k"  # Binance
 ]
 
+logger = logging.getLogger("follow_the_nano") # TODO: Refactor
+logger.setLevel(logging.INFO)
 
 class FollowTheNano:
 
-    def __init__(self, traversal_direction, show_all_balance_sources=False, aliases=None):
+    def __init__(self, starting_addresses, traversal_direction, show_all_balance_sources=False, aliases=None):
         self.traversal_direction = traversal_direction
         self.show_all_balance_sources = show_all_balance_sources
         self.all_transactions: Dict[Dict[TransactionSummary]] = {}
@@ -28,16 +30,7 @@ class FollowTheNano:
         self.depth_counter = 0
         self.history_requestor = HistoryRequestor(
             use_real_rpc=not IS_TESTING_MODE)
-        self.aliases = aliases
-
-    def start_exploring(self, starting_addresses: List[str], explore_depth:int=1):
-        self.graph = NanoGraph(starting_addresses, self.aliases)
-        explore_count = 0
-        next_addresses = set(starting_addresses)
-        while explore_count < explore_depth:
-            next_addresses = self.explore(next_addresses)
-            explore_count += 1
-        return next_addresses
+        self.graph = NanoGraph(starting_addresses, aliases)
 
     def explore(self, addresses_to_explore: Set[str]):
         next_addresses_to_explore = set()
@@ -56,10 +49,10 @@ class FollowTheNano:
 
     def should_skip(self, address: str) -> bool:
         if address in self.explored_nodes:
-            logging.warning("Skipping already explored %s", address)
+            logger.warning("Skipping already explored %s", address)
             return True
         if address in IGNORE_LIST:
-            logging.info("Skipping address %s in ignore list", address)
+            logger.info("Skipping address %s in ignore list", address)
             return True
         return False
 
@@ -97,10 +90,10 @@ class FollowTheNano:
                 target_txn = source_txns.get(target)
                 if target_txn:
                     if target_txn == transaction_summary:
-                        logging.debug("Already processed this transaction summary, ignoring")
+                        logger.debug("Already processed this transaction summary, ignoring")
                     else:
                         # Should this be an exception??
-                        logging.error("Detected mismatching transaction summary between %s and %s",
+                        logger.error("Detected mismatching transaction summary between %s and %s",
                                       source,
                                       target)
                     continue
@@ -129,15 +122,24 @@ def main():
              start new graph
     """
     aliases = get_aliases()
-    app = FollowTheNano(TransactionDirection.SEND, show_all_balance_sources=True, aliases=aliases)
-    next_addresses = app.start_exploring(starting_addresses, explore_depth=4)
+    app = FollowTheNano(starting_addresses, TransactionDirection.SEND, show_all_balance_sources=True, aliases=aliases)
+    explore_count = 0
+    next_addresses = set(starting_addresses)
+    while explore_count < 6:
+        next_addresses = app.explore(next_addresses)
+        if not next_addresses:
+            logger.warning("No more addresses to explore, we done here!")
+            break # Set a flag when breaking so we can let user know this is complete
+        explore_count += 1
+    logger.info(f"Graph cost {app.history_requestor.call_counter} RPC calls")
     app.render_transactions()
-
+    # At this point prompt for either exploring more (if not complete) or start a new graph
 
 def get_aliases():
     endpoint = f"{NANO_NINJA_BASE_URL}/{ALIASES_ENDPOINT}"
     resp = requests.get(endpoint)
     resp_json = resp.json()
+    # TODO: Error handling
     aliases = {alias["account"]:alias["alias"] for alias in resp_json}
     return aliases
 
