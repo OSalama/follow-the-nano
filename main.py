@@ -5,6 +5,7 @@ from collections import defaultdict
 from decimal import Decimal
 from models import TransactionSummary, TransactionDirection, RAW_TO_MNANO
 from rpc import HistoryRequestor
+import requests
 
 IS_TESTING_MODE = False
 
@@ -18,7 +19,7 @@ IGNORE_LIST = [
 
 class FollowTheNano:
 
-    def __init__(self, traversal_direction, show_all_balance_sources=False):
+    def __init__(self, traversal_direction, show_all_balance_sources=False, aliases=None):
         self.traversal_direction = traversal_direction
         self.show_all_balance_sources = show_all_balance_sources
         self.all_transactions: Dict[Dict[TransactionSummary]] = {}
@@ -26,9 +27,10 @@ class FollowTheNano:
         self.depth_counter = 0
         self.history_requestor = HistoryRequestor(
             use_real_rpc=not IS_TESTING_MODE)
+        self.aliases = aliases
 
     def start_exploring(self, starting_addresses: List[str], explore_depth:int=1):
-        self.graph = NanoGraph(starting_addresses)
+        self.graph = NanoGraph(starting_addresses, self.aliases)
         explore_count = 0
         next_addresses = set(starting_addresses)
         while explore_count < explore_depth:
@@ -125,10 +127,20 @@ def main():
              explore n more times
              start new graph
     """
-    app = FollowTheNano(TransactionDirection.SEND, show_all_balance_sources=True)
+    aliases = get_aliases()
+    app = FollowTheNano(TransactionDirection.SEND, show_all_balance_sources=True, aliases=aliases)
     next_addresses = app.start_exploring(starting_addresses, explore_depth=4)
     app.render_transactions()
 
+
+def get_aliases():
+    NANO_NINJA_BASE_URL = "https://mynano.ninja/api/"
+    ALIASES_ENDPOINT = "/accounts/aliases"
+    endpoint = f"{NANO_NINJA_BASE_URL}{ALIASES_ENDPOINT}"
+    resp = requests.get(endpoint)
+    resp_json = resp.json()
+    aliases = {alias["account"]:alias["alias"] for alias in resp_json}
+    return aliases
 
 if __name__ == "__main__":
     main()
