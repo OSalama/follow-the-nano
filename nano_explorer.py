@@ -1,24 +1,26 @@
-import logging
-from graph import NanoGraph
-from typing import Dict, List, Set
-from collections import defaultdict
+
 from decimal import Decimal
-from models import TransactionSummary, TransactionDirection, RAW_TO_MNANO
+from typing import Dict, List, Set
+from models import RAW_TO_MNANO, TransactionDirection, TransactionSummary
 from rpc import HistoryRequestor
-import requests
+from graph import NanoGraph
+import logging
+
+
 
 IS_TESTING_MODE = False
 NANO_NINJA_BASE_URL = "https://mynano.ninja/api"
 ALIASES_ENDPOINT = "accounts/aliases"
 API_KEY = ""
 SEPARATOR = "-"
-
 IGNORE_LIST = [
     "nano_3jwrszth46rk1mu7rmb4rhm54us8yg1gw3ipodftqtikf5yqdyr7471nsg1k"  # Binance
 ]
 
-logger = logging.getLogger("follow_the_nano") # TODO: Refactor
+
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
 
 class FollowTheNano:
 
@@ -104,44 +106,3 @@ class FollowTheNano:
 
     def render_transactions(self):
         self.graph.render_graph()
-
-
-def main():
-    # test with dodgy guy from reddit https://www.reddit.com/r/WeNano/comments/lcp64f/suspected_gps_spoofer/
-    starting_addresses = [
-        "nano_3qt7yt39jnzq516npbiicqy4oijoez3icpgbfbqxeayfgazyzrnk8qd4bdtf"]  # TODO: Take as input
-    """
-    Expected eventual flow:
-
-    start a new graph for given set of addresses (app.start_exploring(...))
-    option:
-        explore a user defined number of times
-    render graph so far
-    pause for more input, which can either be:
-             explore n more times
-             start new graph
-    """
-    aliases = get_aliases()
-    app = FollowTheNano(starting_addresses, TransactionDirection.SEND, show_all_balance_sources=True, aliases=aliases)
-    explore_count = 0
-    next_addresses = set(starting_addresses)
-    while explore_count < 6:
-        next_addresses = app.explore(next_addresses)
-        if not next_addresses:
-            logger.warning("No more addresses to explore, we done here!")
-            break # Set a flag when breaking so we can let user know this is complete
-        explore_count += 1
-    logger.info(f"Graph cost {app.history_requestor.call_counter} RPC calls")
-    app.render_transactions()
-    # At this point prompt for either exploring more (if not complete) or start a new graph
-
-def get_aliases():
-    endpoint = f"{NANO_NINJA_BASE_URL}/{ALIASES_ENDPOINT}"
-    resp = requests.get(endpoint)
-    resp_json = resp.json()
-    # TODO: Error handling
-    aliases = {alias["account"]:alias["alias"] for alias in resp_json}
-    return aliases
-
-if __name__ == "__main__":
-    main()
