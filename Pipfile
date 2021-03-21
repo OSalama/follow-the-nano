@@ -1,0 +1,14 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+graphviz = "==0.16"
+nano-python = "==2.0.1"
+Flask = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"

@@ -1,2 +1,0 @@
-graphviz==0.16
-nano-python==2.0.1
