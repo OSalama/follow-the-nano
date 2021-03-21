@@ -4,9 +4,12 @@ from random import randint, choice
 import logging
 from models import RAW_TO_MNANO, TransactionDirection
 
-NODE_URL = "https://proxy.nanos.cc/proxy/" # Put your node URL in here. Public nodes available at https://publicnodes.somenano.com/
+# Put your node URL in here. Public nodes available at https://publicnodes.somenano.com/
+NODE_URL = "https://proxy.nanos.cc/proxy/"
 
 MAX_CALLS_PER_GRAPH = 100
+
+
 class HistoryRequestor:
 
     def __init__(self, use_real_rpc=True, transaction_limit=100):
@@ -17,7 +20,8 @@ class HistoryRequestor:
 
     def get_account_history(self, nano_address: str) -> Optional[Dict]:
         if self.call_counter >= MAX_CALLS_PER_GRAPH:
-            logging.error("Reached max calls per graph: %d", MAX_CALLS_PER_GRAPH)
+            logging.error("Reached max calls per graph: %d",
+                          MAX_CALLS_PER_GRAPH)
             raise ValueError("Graph reached max call limit")
         self.call_counter += 1
         if self.use_real_rpc:
@@ -39,6 +43,6 @@ class HistoryRequestor:
         for _ in range(numtx):
             transactions.append(
                 {"type": choice(list(TransactionDirection)).value,
-                "account": f"nano_{randint(1000, 9999)}",
-                "amount": randint(1, 10) * RAW_TO_MNANO})
+                 "account": f"nano_{randint(1000, 9999)}",
+                 "amount": randint(1, 10) * RAW_TO_MNANO})
         return transactions

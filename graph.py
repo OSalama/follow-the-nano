@@ -22,7 +22,8 @@ class NanoGraph:
             if address in self.aliases:
                 label = self.aliases[address]
             else:
-                label = address[:10] # Limit address length for easier viewing of graph
+                # Limit address length for easier viewing of graph
+                label = address[:10]
             self.graph.node(address,
                             label=label,
                             URL=NANOCRAWLER_ACCOUNT_URL.format(address=address))

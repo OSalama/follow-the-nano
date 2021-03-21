@@ -23,7 +23,7 @@ class FollowTheNanoServer:
     def new_request(self, starting_addresses, direction, explore_depth=4, show_all_transactions=False):
         explore_request = FollowTheNano(starting_addresses,
                                         direction,
-                                        show_all_balance_sources=show_all_transactions,
+                                        show_all_transactions=show_all_transactions,
                                         aliases=self.aliases)
         explore_count = 0
         next_addresses = set(starting_addresses)
@@ -37,6 +37,7 @@ class FollowTheNanoServer:
             f"Graph cost {explore_request.history_requestor.call_counter} RPC calls")
         explore_request.render_transactions()
         # At this point prompt for either exploring more (if not complete) or start a new graph
+
 
 def get_aliases():
     endpoint = f"{NANO_NINJA_BASE_URL}/{ALIASES_ENDPOINT}"

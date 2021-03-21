@@ -24,9 +24,9 @@ logger.setLevel(logging.INFO)
 
 class FollowTheNano:
 
-    def __init__(self, starting_addresses, traversal_direction, show_all_balance_sources=False, aliases=None):
+    def __init__(self, starting_addresses, traversal_direction, show_all_transactions=False, aliases=None):
         self.traversal_direction = traversal_direction
-        self.show_all_balance_sources = show_all_balance_sources
+        self.show_all_transactions = show_all_transactions
         self.all_transactions: Dict[Dict[TransactionSummary]] = {}
         self.explored_nodes = set()
         self.depth_counter = 0
@@ -73,7 +73,7 @@ class FollowTheNano:
                     current_transactions[key] = txn
                 txn.add(mnano_amount)
                 next_addresses.add(target_address)
-            elif self.show_all_balance_sources:
+            elif self.show_all_transactions:
                 key = f"{target_address}{SEPARATOR}{address}"
                 txn = current_transactions.get(key)
                 if not txn:

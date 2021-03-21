@@ -9,9 +9,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-
 def main():
-    server = FollowTheNanoServer() # TODO: Obviously insert layer between client/server
+    server = FollowTheNanoServer()  # TODO: Obviously insert layer between client/server
     # test with dodgy guy from reddit https://www.reddit.com/r/WeNano/comments/lcp64f/suspected_gps_spoofer/
     starting_addresses = [
         "nano_3qt7yt39jnzq516npbiicqy4oijoez3icpgbfbqxeayfgazyzrnk8qd4bdtf"]  # TODO: Take as input
@@ -29,5 +28,6 @@ def main():
     server.new_request(starting_addresses, TransactionDirection.SEND)
     # At this point prompt for either exploring more (if not complete) or start a new graph
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()
