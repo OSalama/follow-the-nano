@@ -35,7 +35,7 @@ class NanoGraph:
                         )
 
     def render_graph(self):
-        self.graph.render("test.gv", view=True, format="svg")
+        self.graph.render("test.gv", view=False, format="svg")
 
     def add_transaction(self, transaction_summary: TransactionSummary):
         self.add_node(transaction_summary.source_address)
