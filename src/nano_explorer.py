@@ -61,7 +61,7 @@ class FollowTheNano:
     def summarise_transactions(self, address: str, transaction_history: List[Dict]) -> Set[str]:
         next_addresses = set()
         current_transactions = {}
-        logger.info("exploring %s", address)
+        logger.debug("exploring %s", address)
         for transaction in transaction_history:
             raw_amount = transaction["amount"]
             mnano_amount = (Decimal(raw_amount) / RAW_TO_MNANO)
@@ -74,7 +74,7 @@ class FollowTheNano:
                     current_transactions[key] = txn
                 txn.add(mnano_amount)
                 next_addresses.add(target_address)
-            elif self.show_all_transactions:
+            elif self.show_all_transactions and address != target_address:
                 key = f"{target_address}{SEPARATOR}{address}"
                 txn = current_transactions.get(key)
                 if not txn:
