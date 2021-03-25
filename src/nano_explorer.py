@@ -14,7 +14,10 @@ ALIASES_ENDPOINT = "accounts/aliases"
 API_KEY = ""
 SEPARATOR = "-"
 IGNORE_LIST = [
-    "nano_3jwrszth46rk1mu7rmb4rhm54us8yg1gw3ipodftqtikf5yqdyr7471nsg1k"  # Binance
+    "nano_3jwrszth46rk1mu7rmb4rhm54us8yg1gw3ipodftqtikf5yqdyr7471nsg1k",  # Binance
+    "nano_3decyj8e1kpzrthikh79x6dwhn8ei81grennibmt43mcm9o8fgxqd8t46whj", # Mercatox
+    "nano_1niabkx3gbxit5j5yyqcpas71dkffggbr6zpd3heui8rpoocm5xqbdwq44oh", # KuCoin
+    "nano_1tig1rio7iskejqgy6ap75rima35f9mexjazdqqquthmyu48118jiewny7zo", # OKEx
 ]
 
 

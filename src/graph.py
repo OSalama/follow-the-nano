@@ -15,7 +15,10 @@ class NanoGraph:
         self.aliases = aliases
         for node in self.root_nodes:
             self.graph.node(
-                node, URL=NANOCRAWLER_ACCOUNT_URL.format(address=node))
+                node,
+                URL=NANOCRAWLER_ACCOUNT_URL.format(address=node),
+                color="green",
+                shape="octagon") #TODO: Play with color/shape/style=filled 
 
     def add_node(self, address: str) -> None:
         if address not in self.root_nodes:
