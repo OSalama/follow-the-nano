@@ -45,9 +45,9 @@ def handle_request(starting_addresses, direction, show_all_transactions=False, e
     explore_request.render_transactions()
     # TODO: At this point prompt for either exploring more (if not complete) or start a new graph
 
-@app.route("/explore/<address>")
-def explore_address(address):
-    starting_addresses = [address]
+@app.route("/explore")
+def explore_address():
+    starting_addresses = [request.args.get("address")]
     direction = TransactionDirection(request.args.get("direction"))
     show_all_transactions = request.args.get("show_all_transactions")
     explore_depth = int(request.args.get("explore_depth"))
