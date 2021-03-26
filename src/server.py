@@ -2,7 +2,7 @@ import logging
 from models import TransactionDirection
 from nano_explorer import FollowTheNano
 import requests
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, render_template
 
 app = Flask(__name__)
 
@@ -56,4 +56,6 @@ def explore_address(address):
     # TODO: Have a landing/splash page which prompts for inputs
     return send_file("test.gv.svg", mimetype="image/svg+xml")
 
-
+@app.route("/")
+def index():
+    return render_template("index/index.html")
